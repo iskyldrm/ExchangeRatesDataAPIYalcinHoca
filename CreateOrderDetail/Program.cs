@@ -11,7 +11,7 @@ namespace CreateOrderDetail
     {
         static void Main(string[] args)
         {
-            #region Employee
+            #region SelectEmployee
             HttpWebRequest httpWebRequest = (HttpWebRequest)HttpWebRequest.Create($"Https://localhost:44349/Values/GetEmployee");
             httpWebRequest.Method = "GET";
 
@@ -32,12 +32,12 @@ namespace CreateOrderDetail
                 Console.WriteLine("Çalışanlar:  " + item.id + "    " + item.firstLastName);
             }
             Console.Write("Lütfen hangi çalışan olduğunuzu belirtiniz(ex=>Id=10):");
-            var EmployeeId = Convert.ToInt32(Console.ReadLine());
-            Console.WriteLine(EmployeeId + " nolu sipariş");
+            var employEeID = Convert.ToInt32(Console.ReadLine());
+            Console.WriteLine(employEeID + " nolu sipariş");
 
             #endregion
 
-            #region Customer
+            #region SelectCustomer
             HttpWebRequest httpWebRequest1 = (HttpWebRequest)HttpWebRequest.Create($"https://localhost:44349/Values/GetCustomer");
             httpWebRequest1.Method = "GET";
 
@@ -58,11 +58,11 @@ namespace CreateOrderDetail
                 Console.WriteLine("Müşteriler:  " + item.customerId + "    " + item.customerName);
             }
             Console.Write("\nLütfen siparişin kime olduğunu beliritniz(ex=>Id=ALFKI):");
-            var CustomerId = Console.ReadLine();
-            Console.WriteLine("\n" + EmployeeId + " nolu çalışan " + CustomerId + " nolu müşteriye");
+            var customerId = Console.ReadLine();
+            Console.WriteLine("\n" + employEeID + " nolu çalışan " + customerId + " nolu müşteriye");
             #endregion
 
-            #region Customer
+            #region CreatingOrder
             HttpWebRequest httpWebRequest2 = (HttpWebRequest)HttpWebRequest.Create($"https://localhost:44349/Values/GetProduct");
             httpWebRequest1.Method = "GET";
 
@@ -96,35 +96,99 @@ namespace CreateOrderDetail
 
                 Urunler.Add(ProductId);
             }
-            var yeni = new string[200];
+            List<string> yeni = new List<string>();
             foreach (var item in Urunler)
             {
-                yeni = item.ToString().Split("*");
+                var dizi = item.Split("*");
+                yeni.Add(dizi[0]);
+                yeni.Add(dizi[1]);
 
             }
             List<int> urun = new List<int>();
             List<int> adet = new List<int>();
-            for (int i = 0; i < yeni.Length; i += 2)
+            for (int i = 0; i < yeni.Count; i += 2)
             {
                 int gelen = Convert.ToInt32(yeni[i]);
                 int gelen1 = Convert.ToInt32(yeni[i + 1]);
                 urun.Add(gelen);
                 adet.Add(gelen1);
             }
+            Console.WriteLine("\n" + employEeID + " nolu çalışan " + customerId + " nolu müşteriye aşağıdaki ürünleri");
             foreach (var item in urun)
             {
-                Console.WriteLine(item.ToString() + ",");
+                Console.Write(item.ToString() + ",   ");
             }
+            Console.WriteLine("\nAşağıdaki adet sayısı kadar");
             foreach (var item in adet)
             {
-                Console.WriteLine(item.ToString() + ",");
+                Console.Write(item.ToString() + ",   ");
             }
 
 
 
-            Console.WriteLine("\n" + EmployeeId + " nolu çalışan " + CustomerId + " nolu müşteriye");
+
             #endregion
 
+            #region SelectShipper
+            HttpWebRequest httpWebRequest3 = (HttpWebRequest)HttpWebRequest.Create($"https://localhost:44349/Values/GetShipper");
+            httpWebRequest.Method = "GET";
+
+            string Shippers = string.Empty;
+            using (HttpWebResponse response1 = (HttpWebResponse)httpWebRequest3.GetResponse())
+            {
+                Stream stream = response1.GetResponseStream();
+                StreamReader reader = new StreamReader(stream);
+                Shippers = reader.ReadToEnd();
+                reader.Close();
+                stream.Close();
+
+            }
+            var shipper = JsonSerializer.Deserialize<List<ShipperDTO>>(Shippers, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+            Console.WriteLine("\nKargocular | Id | İsim ");
+            foreach (ShipperDTO item in shipper)
+            {
+                Console.WriteLine("Çalışanlar:  " + item.shipperId + "    " + item.shipperName);
+            }
+            Console.Write("Lütfen hangi kargocu olduğunuzu belirtiniz(ex=>Id=1):");
+            var shipVia = Convert.ToInt32(Console.ReadLine());
+            var shipName = " ";
+            foreach (var item in shipper)
+            {
+                if (item.shipperId == shipVia)
+                {
+                    shipName = item.shipperName;
+                }
+            }
+            Console.WriteLine("\n" + employEeID + " nolu çalışan " + customerId + " nolu müşteriye aşağıdaki ürünleri");
+            foreach (var item in urun)
+            {
+                Console.Write(item.ToString() + ",   ");
+            }
+            Console.WriteLine("\nAşağıdaki adet sayısı kadar");
+            foreach (var item in adet)
+            {
+                Console.Write(item.ToString() + ",   ");
+            }
+            Console.WriteLine("\n " + shipVia + "nolu kargocu ile gönderecektir.");
+
+            #endregion
+
+            #region POSTCreatOrderDATABASE
+            HttpWebRequest httpWebRequest4 = (HttpWebRequest)HttpWebRequest.Create($"https://localhost:44349/Values/CreatOrder?employEeID={employEeID}&customerId={customerId}&shipVia={shipVia}&shipName={shipName}");
+            httpWebRequest.Method = "GET";
+
+            int effected = 0;
+            using (HttpWebResponse responseCreatOrder = (HttpWebResponse)httpWebRequest4.GetResponse())
+            {
+                Stream stream = responseCreatOrder.GetResponseStream();
+                StreamReader reader = new StreamReader(stream);
+                effected = Convert.ToInt32(reader.ReadToEnd());
+                reader.Close();
+                stream.Close();
+
+            }
+            Console.WriteLine(effected.ToString());
+            #endregion
 
         }
     }
