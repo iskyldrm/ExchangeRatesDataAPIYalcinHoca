@@ -212,7 +212,14 @@ namespace CreateOrderDetail
             {
                 var productId = yeni[i];
                 var quantity = Convert.ToDecimal(yeni[i + 1]);
-                var unitPrice = 14.00;
+                decimal unitPrice = 0;
+                foreach (var item in Product)
+                {
+                    if (item.productId.ToString() == productId)
+                    {
+                        unitPrice = item.unitprice;
+                    }
+                }
                 HttpWebRequest httpWebRequest6 = (HttpWebRequest)HttpWebRequest.Create($"https://localhost:44349/Values/CreatOrderDetail?orderId={LastoID}&productId={productId}&unitPrice={unitPrice}&quantity={quantity}&discount=0");
                 httpWebRequest.Method = "GET";
 
