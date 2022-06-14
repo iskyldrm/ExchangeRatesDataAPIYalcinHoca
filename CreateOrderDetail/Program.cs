@@ -190,6 +190,23 @@ namespace CreateOrderDetail
             Console.WriteLine(effected.ToString());
             #endregion
 
+            #region LastOrderId
+            HttpWebRequest httpWebRequest5 = (HttpWebRequest)HttpWebRequest.Create($"https://localhost:44349/Values/GetLastOrderId?customerId={customerId}");
+            httpWebRequest.Method = "GET";
+
+            string lastOrderId = string.Empty;
+            using (HttpWebResponse response1 = (HttpWebResponse)httpWebRequest5.GetResponse())
+            {
+                Stream stream = response1.GetResponseStream();
+                StreamReader reader = new StreamReader(stream);
+                lastOrderId = reader.ReadToEnd();
+                reader.Close();
+                stream.Close();
+
+            }
+            var LastOrderId = JsonSerializer.Deserialize<List<LastOrderIdDTO>>(lastOrderId, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+            #endregion
         }
     }
 }
