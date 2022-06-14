@@ -187,7 +187,6 @@ namespace CreateOrderDetail
                 stream.Close();
 
             }
-            Console.WriteLine(effected.ToString());
             #endregion
 
             #region LastOrderId
@@ -205,8 +204,33 @@ namespace CreateOrderDetail
 
             }
             var LastOrderId = JsonSerializer.Deserialize<List<LastOrderIdDTO>>(lastOrderId, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-
+            var LastoID = LastOrderId[0].orderId;
             #endregion
+
+            #region CreateOrderDeteails
+            for (int i = 0; i < yeni.Count; i += 2)
+            {
+                var productId = yeni[i];
+                var quantity = Convert.ToDecimal(yeni[i + 1]);
+                var unitPrice = 14.00;
+                HttpWebRequest httpWebRequest6 = (HttpWebRequest)HttpWebRequest.Create($"https://localhost:44349/Values/CreatOrderDetail?orderId={LastoID}&productId={productId}&unitPrice={unitPrice}&quantity={quantity}&discount=0");
+                httpWebRequest.Method = "GET";
+
+                int updated = 0;
+                using (HttpWebResponse responseCreatOrderDetail = (HttpWebResponse)httpWebRequest6.GetResponse())
+                {
+                    Stream stream = responseCreatOrderDetail.GetResponseStream();
+                    StreamReader reader = new StreamReader(stream);
+                    updated = Convert.ToInt32(reader.ReadToEnd());
+                    reader.Close();
+                    stream.Close();
+
+                }
+
+            }
+            #endregion
+
+
         }
     }
 }
